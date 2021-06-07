@@ -61,7 +61,7 @@ Que::Web::SQL = {
     FROM public.que_jobs
     LEFT JOIN (
       SELECT (classid::bigint << 32) + objid::bigint AS job_id
-      FROM public.pg_locks
+      FROM pg_locks
       WHERE locktype = 'advisory'
     ) locks ON (que_jobs.id=locks.job_id)
     WHERE locks.job_id IS NULL
@@ -79,7 +79,7 @@ Que::Web::SQL = {
     FROM public.que_jobs
     LEFT JOIN (
       SELECT (classid::bigint << 32) + objid::bigint AS job_id
-      FROM public.pg_locks
+      FROM pg_locks
       WHERE locktype = 'advisory'
     ) locks ON (que_jobs.id=locks.job_id)
     WHERE locks.job_id IS NULL
