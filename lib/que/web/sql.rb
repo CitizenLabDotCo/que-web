@@ -96,11 +96,11 @@ Que::Web::SQL = {
   delete_all_scheduled_jobs: delete_jobs_query(lock_all_scheduled_jobs_sql),
   delete_all_failing_jobs: delete_jobs_query(lock_all_failing_jobs_sql),
   reschedule_job: <<-SQL.freeze,
-    WITH target AS (#{lock_job_sql})
+    WITH target AS (public.#{lock_job_sql})
     UPDATE que_jobs
     SET run_at = $2::timestamptz,
         expired_at = NULL
-    FROM public.target
+    FROM target
     WHERE target.locked
     AND target.id = que_jobs.id
     RETURNING pg_advisory_unlock(target.id)
