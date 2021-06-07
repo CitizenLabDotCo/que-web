@@ -1,24 +1,24 @@
 lock_job_sql = <<-SQL.freeze
     SELECT id, pg_try_advisory_lock(id) AS locked
-    FROM que_jobs
+    FROM public.que_jobs
     WHERE id = $1::bigint
 SQL
 
 lock_all_failing_jobs_sql = <<-SQL.freeze
     SELECT id, pg_try_advisory_lock(id) AS locked
-    FROM que_jobs
+    FROM public.que_jobs
     WHERE error_count > 0
 SQL
 
 lock_all_scheduled_jobs_sql = <<-SQL.freeze
     SELECT id, pg_try_advisory_lock(id) AS locked
-    FROM que_jobs
+    FROM public.que_jobs
     WHERE error_count = 0
 SQL
 
 def reschedule_all_jobs_query(scope)
   <<-SQL.freeze
-    WITH target AS (#{scope})
+    WITH target AS (public.#{scope})
     UPDATE que_jobs
     SET run_at = $1::timestamptz,
         expired_at = NULL
@@ -32,7 +32,7 @@ end
 def delete_jobs_query(scope)
   <<-SQL.freeze
     WITH target AS (#{scope})
-    DELETE FROM que_jobs
+    DELETE FROM public.que_jobs
     USING target
     WHERE target.locked
     AND target.id = que_jobs.id
@@ -46,10 +46,10 @@ Que::Web::SQL = {
            count(locks.job_id)         AS running,
            coalesce(sum((error_count > 0 AND locks.job_id IS NULL)::int), 0) AS failing,
            coalesce(sum((error_count = 0 AND locks.job_id IS NULL)::int), 0) AS scheduled
-    FROM que_jobs
+    FROM public.que_jobs
     LEFT JOIN (
       SELECT (classid::bigint << 32) + objid::bigint AS job_id
-      FROM pg_locks
+      FROM public.pg_locks
       WHERE locktype = 'advisory'
     ) locks ON (que_jobs.id=locks.job_id)
     WHERE
@@ -58,10 +58,10 @@ Que::Web::SQL = {
   SQL
   failing_jobs: <<-SQL.freeze,
     SELECT que_jobs.*
-    FROM que_jobs
+    FROM public.que_jobs
     LEFT JOIN (
       SELECT (classid::bigint << 32) + objid::bigint AS job_id
-      FROM pg_locks
+      FROM public.pg_locks
       WHERE locktype = 'advisory'
     ) locks ON (que_jobs.id=locks.job_id)
     WHERE locks.job_id IS NULL
@@ -76,10 +76,10 @@ Que::Web::SQL = {
   SQL
   scheduled_jobs: <<-SQL.freeze,
     SELECT que_jobs.*
-    FROM que_jobs
+    FROM public.que_jobs
     LEFT JOIN (
       SELECT (classid::bigint << 32) + objid::bigint AS job_id
-      FROM pg_locks
+      FROM public.pg_locks
       WHERE locktype = 'advisory'
     ) locks ON (que_jobs.id=locks.job_id)
     WHERE locks.job_id IS NULL
@@ -100,7 +100,7 @@ Que::Web::SQL = {
     UPDATE que_jobs
     SET run_at = $2::timestamptz,
         expired_at = NULL
-    FROM target
+    FROM public.target
     WHERE target.locked
     AND target.id = que_jobs.id
     RETURNING pg_advisory_unlock(target.id)
@@ -109,7 +109,7 @@ Que::Web::SQL = {
   reschedule_all_failing_jobs: reschedule_all_jobs_query(lock_all_failing_jobs_sql),
   fetch_job: <<-SQL.freeze,
     SELECT *
-    FROM que_jobs
+    FROM public.que_jobs
     WHERE id = $1::bigint
     LIMIT 1
   SQL
