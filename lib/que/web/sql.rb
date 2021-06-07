@@ -19,7 +19,7 @@ SQL
 def reschedule_all_jobs_query(scope)
   <<-SQL.freeze
     WITH target AS (#{scope})
-    UPDATE que_jobs
+    UPDATE public.que_jobs
     SET run_at = $1::timestamptz,
         expired_at = NULL
     FROM target
@@ -49,7 +49,7 @@ Que::Web::SQL = {
     FROM public.que_jobs
     LEFT JOIN (
       SELECT (classid::bigint << 32) + objid::bigint AS job_id
-      FROM public.pg_locks
+      FROM pg_locks
       WHERE locktype = 'advisory'
     ) locks ON (que_jobs.id=locks.job_id)
     WHERE
@@ -97,7 +97,7 @@ Que::Web::SQL = {
   delete_all_failing_jobs: delete_jobs_query(lock_all_failing_jobs_sql),
   reschedule_job: <<-SQL.freeze,
     WITH target AS (#{lock_job_sql})
-    UPDATE que_jobs
+    UPDATE public.que_jobs
     SET run_at = $2::timestamptz,
         expired_at = NULL
     FROM target
