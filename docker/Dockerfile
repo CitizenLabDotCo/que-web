@@ -2,7 +2,7 @@
 # Run like:
 # docker run -e DATABASE_URL=postgres://username:password@hostname/db_name -p 3002:8080 joevandyk/que-web
 
-FROM dockerfile/ruby
+FROM ruby:2.6
 
 # Define working directory.
 WORKDIR /app
