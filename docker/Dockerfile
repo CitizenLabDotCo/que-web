@@ -7,14 +7,16 @@ FROM ruby:2.6
 WORKDIR /app
 ADD . /app
 
+COPY . /app
+
 # Define working directory.
 RUN apt-get update && \
     apt-get install libpq-dev -y && \
     rm -rf /var/cache/apt/* /var/lib/apt/lists/* \
-    gem install bundler \
-    bundle install
+    gem install bundler puma
+
+RUN bundle install
 
 EXPOSE 8080
 
-# Define default command.
 CMD bundle exec puma -e production -p 8080 /app/config.ru
