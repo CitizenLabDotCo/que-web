@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
-gem 'que-web', git: 'https://github.com/CitizenLabDotCo/que-web', branch: 'master', ref: 'ee593e8c461b0142324998a20eb3017995a792d5'
-gem 'sequel'
+
 gem 'pg'
 gem 'puma'
+gem 'que-web', git: 'https://github.com/CitizenLabDotCo/que-web', branch: 'master', ref: 'ee593e8c461b0142324998a20eb3017995a792d5'
+gem 'sequel'

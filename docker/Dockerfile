@@ -10,9 +10,9 @@ ADD . /app
 # Define working directory.
 RUN apt-get update && \
     apt-get install libpq-dev -y && \
-    rm -rf /var/cache/apt/* /var/lib/apt/lists/*
-
-RUN bundle install
+    rm -rf /var/cache/apt/* /var/lib/apt/lists/* \
+    gem install bundler \
+    bundle install
 
 EXPOSE 8080
 
