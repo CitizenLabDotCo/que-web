@@ -13,9 +13,11 @@ COPY . /app
 RUN apt-get update && \
     apt-get install libpq-dev -y && \
     rm -rf /var/cache/apt/* /var/lib/apt/lists/* \
-    gem install bundler puma
+    gem install bundler
 
 RUN bundle install
+
+RUN gem install puma
 
 EXPOSE 8080
 
